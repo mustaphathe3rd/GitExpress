@@ -56,23 +56,30 @@ export const getAllBranches = async (): Promise<Branch[]> => {
  * @param {string} branchId The ID of the branch to delete.
  * @returns {Promise<void>}
  */
-export const deleteBranch = async (branchId: string): Promise<void> => {
-    try {
-        const branchToDelete = await db.branches.get(branchId);
-        if (!branchToDelete) {
-            throw new Error("Branch not found.");
-        }
-        // Integrity Check: Prevent deleting the main branch
-        if (branchToDelete.name === 'main') {
-            throw new Error("Cannot delete the 'main' branch.");
-        }
-        await db.branches.delete(branchId);
-        console.log(`Branch "${branchToDelete.name}" deleted successfully.`);
-    } catch (error) {
-        console.error(`Failed to delete branch with ID ${branchId}:`, error);
-        throw error;
+export const deleteBranch = async (branchId: string, activeBranchId: string): Promise<void> => {
+    console.log(`[Storage] Attempting to delete branch ID: ${branchId}`);
+    console.log(`[Storage] Current active branch ID: ${activeBranchId}`);
+
+    // Safety Check 1: Do not allow deleting the currently active branch.
+    if (branchId === activeBranchId) {
+        throw new Error("Cannot delete the branch that is currently active.");
     }
-}
+
+    const branchToDelete = await db.branches.get(branchId);
+    if (!branchToDelete) {
+        throw new Error("Branch not found in database.");
+    }
+
+    // Safety Check 2: Do not allow deleting the 'main' branch.
+    if (branchToDelete.name === 'main') {
+        throw new Error("The 'main' branch cannot be deleted.");
+    }
+
+    // If all checks pass, delete the branch.
+    console.log(`[Storage] All safety checks passed. Deleting "${branchToDelete.name}"...`);
+    await db.branches.delete(branchId);
+    console.log(`[Storage] Database delete operation completed.`);
+};
 
 export const getBranchByName = async (name: string): Promise<Branch | undefined> => {
     try {

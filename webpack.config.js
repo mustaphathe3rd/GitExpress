@@ -37,7 +37,10 @@ module.exports = {
             excludeChunks: ["code"]
         }),
         new CopyWebpackPlugin({
-            patterns: [{ from: "src/*.json", to: "[name][ext]" }]
+            patterns: [
+                { from: "src/*.json", to: "[name][ext]" },
+                { from: "src/ui/assets", to: "assets" }
+            ]
         })
     ],
     module: {
@@ -71,7 +74,11 @@ module.exports = {
             {
                 test: /(\.css)$/,
                 use: ["style-loader", "css-loader"]
-            }
+            },
+            {
+                test: /\.(png|jpg|jpeg|gif|svg)$/i,
+                type: "asset/resource",
+            },
         ]
     },
     resolve: {

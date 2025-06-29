@@ -15,6 +15,7 @@
         "panel"
     ],
     "dependencies": {
+        "@spectrum-web-components/progress-circle": "^1.7.0",
         "@swc-react/button": "1.0.3",
         "@swc-react/menu": "^1.7.0",
         "@swc-react/picker": "^1.7.0",

@@ -32,7 +32,7 @@ export async function initializeRepository(): Promise<Repository> {
       await db.branches.add({
         id: mainBranchId,
         name: 'main',
-        head: '', // No commits yet
+        head: null, // The head should be null initially, not an empty string
         created: Date.now(),
       });
     });

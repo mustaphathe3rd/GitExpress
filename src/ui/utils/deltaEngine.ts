@@ -1,5 +1,5 @@
 import { compare, applyPatch, Operation } from 'fast-json-patch';
-import { compress, decompress } from 'lz4-wasm'; // REMOVED 'init'
+import { compress, decompress } from 'lz4-wasm';
 
 /**
  * Calculates the difference between two document states and returns a highly compressed patch.
@@ -9,14 +9,11 @@ import { compress, decompress } from 'lz4-wasm'; // REMOVED 'init'
  */
 export async function calculateAndCompressDelta(baseState: any, newState: any): Promise<Uint8Array> {
     const patch: Operation[] = compare(baseState, newState);
-
     if (patch.length === 0) {
-        return new Uint8Array();
+        return new Uint8Array(); // Return empty array for no changes
     }
-
     const patchString = JSON.stringify(patch);
     const inputBuffer = new TextEncoder().encode(patchString);
-
     return await compress(inputBuffer);
 }
 
@@ -27,6 +24,12 @@ export async function calculateAndCompressDelta(baseState: any, newState: any): 
  * @returns A Promise that resolves to the fully reconstructed new document state.
  */
 export async function reconstructStateFromDelta(baseState: any, compressedDelta: Uint8Array): Promise<any> {
+    // FIX: Check if the delta is empty (no changes)
+    if (compressedDelta.length === 0) {
+        // No changes were made, return the base state as-is
+        return baseState;
+    }
+    
     const decompressedBuffer = await decompress(compressedDelta);
     const patchString = new TextDecoder().decode(decompressedBuffer);
     const patch: Operation[] = JSON.parse(patchString);

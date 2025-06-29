@@ -76,7 +76,13 @@ async function restoreChildren(parent: any, childrenData: any[]) {
                 if (childData.width !== undefined) newNode.width = childData.width;
                 if (childData.height !== undefined) newNode.height = childData.height;
             }
-            
+            if (childData.type === "Text" || childData.type === "StandaloneText") {
+                if (childData.fontSize) newNode.fontSize = childData.fontSize;
+                if (childData.fontFamily) newNode.fontFamily = childData.fontFamily;
+                if (childData.fontStyle) newNode.fontStyle = childData.fontStyle;
+                if (childData.fontWeight) newNode.fontWeight = childData.fontWeight;
+                if (childData.textAlign) newNode.textAlign = childData.textAlign;
+            }
             if (childData.fill && childData.fill.type === "Color") {
                 newNode.fill = editor.makeColorFill(childData.fill.color);
             }
@@ -121,6 +127,43 @@ function start(): void {
             parent.children.clear();
             await restoreChildren(parent, state.children);
         },
+
+         createThumbnail: async (): Promise<string> => {
+            try {
+                const parent = editor.context.insertionParent;
+                const items = parent.children;
+                let circles = '';
+                let count = 0;
+                
+                for (const item of items) {
+                    if (count >= 5) break;
+                    if (item.type === "Ellipse" || item.type === "Rectangle" || item.type === "Text") {
+                        const fill = (item as any).fill;
+                        let color = '#cccccc'; // Default grey
+                        if (fill?.type === 'Color' && fill.color) {
+                            const { red, green, blue } = fill.color;
+                            color = `rgb(${Math.round(red * 255)}, ${Math.round(green * 255)}, ${Math.round(blue * 255)})`;
+                        }
+                        circles += `<circle cx="${15 + count * 20}" cy="15" r="7" fill="${color}" stroke="white" stroke-width="1"/>`;
+                        count++;
+                    }
+                }
+
+                const svg = `<svg width="100" height="30" xmlns="http://www.w3.org/2000/svg">${circles}</svg>`;
+                
+                // This is a more robust way to create a data URL than btoa()
+                const svgDataURL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+                
+                // FINAL DIAGNOSTIC LOG
+                console.log("Generated Thumbnail Data URL:", svgDataURL);
+                
+                return svgDataURL;
+
+            } catch (error) {
+                console.error("SVG Thumbnail generation failed:", error);
+                return "";
+            }
+        }
     };
     runtime.exposeApi(sandboxApi);
 }

@@ -13,7 +13,7 @@ export interface Repository {
 export interface Branch {
   id: string;
   name: string;
-  head: string; // ID of the latest commit in this branch
+  head: string | null; // A branch can have no commits yet
   created: number;
 }
 
@@ -24,6 +24,10 @@ export interface Commit {
   author: string;
   timestamp: number;
   parent: string | null; // The ID of the parent commit
-  documentState: any; // Full document snapshot (for now)
-  // We will add a 'delta' property later
+
+  // ---NEW PROPERTIES ---
+  isSnapshot: boolean;  // Is this a full snapshot or a delta?
+  payload: Uint8Array; // Can be either the compressed snapshot or a compressed delta
+  thumbnail?: string; // NEW: Optional property for a Base64 thumbnail image
+  
 }

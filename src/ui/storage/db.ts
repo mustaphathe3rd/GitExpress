@@ -13,6 +13,12 @@ export class GitExpressDB extends Dexie {
             branches: 'id, name', // Primary key is 'id', index 'name' for quick lookups
             commits: 'id, branchId, timestamp', // Primary key is 'id', index on timestamp for history
         });
+
+        this.version(2).stores({
+            repositories: 'id', // schemas must be fully specified in each version
+            branches: 'id, name, head',
+            commits: 'id, branchId, timestamp, parent, isSnapshot, payload, thumbnail' // Added new properties
+        })
     }
 }
 
