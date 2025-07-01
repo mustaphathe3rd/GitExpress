@@ -1,25 +1,21 @@
-import Dexie , { Table } from 'dexie';
-import { Repository, Branch, Commit} from '../utils/types';
+import Dexie, { Table } from 'dexie';
+import { Repository, Branch, Commit } from '../utils/types';
 
 export class GitExpressDB extends Dexie {
-    repositories!: Table<Repository, string>;
-    branches!: Table<Branch, string>;
-    commits!: Table<Commit, string>;
+  repositories!: Table<Repository, string>;
+  branches!: Table<Branch, string>;
+  commits!: Table<Commit, string>;
 
-    constructor() {
-        super('GitExpressDatabase');
-        this.version(1).stores({
-            repositories: 'id', // Primary key is 'id'
-            branches: 'id, name', // Primary key is 'id', index 'name' for quick lookups
-            commits: 'id, branchId, timestamp', // Primary key is 'id', index on timestamp for history
-        });
-
-        this.version(2).stores({
-            repositories: 'id', // schemas must be fully specified in each version
-            branches: 'id, name, head',
-            commits: 'id, branchId, timestamp, parent, isSnapshot, payload, thumbnail' // Added new properties
-        })
-    }
+  constructor() {
+    super('GitExpressDatabase');
+    
+    // This defines the final, correct schema for our database.
+    this.version(1).stores({
+        repositories: 'id, activeBranch',
+        branches: 'id, name, head',
+        commits: 'id, branchId, message, author, timestamp, *parents, isSnapshot, payload, thumbnail'
+    });
+  }
 }
 
 export const db = new GitExpressDB();

@@ -23,8 +23,7 @@ export interface Commit {
   message: string;
   author: string;
   timestamp: number;
-  parent: string | null; // The ID of the parent commit
-
+  parents: (string | null)[] // change 'parent' to 'parents' and make it an array
   // ---NEW PROPERTIES ---
   isSnapshot: boolean;  // Is this a full snapshot or a delta?
   payload: Uint8Array; // Can be either the compressed snapshot or a compressed delta

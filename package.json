@@ -25,6 +25,7 @@
         "dexie-react-hooks": "^1.1.7",
         "fast-json-patch": "^3.1.1",
         "lz4-wasm": "^0.9.2",
+        "mermaid": "^11.7.0",
         "react": "18.2.0",
         "react-dom": "18.2.0"
     },

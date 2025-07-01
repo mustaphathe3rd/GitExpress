@@ -20,7 +20,7 @@ export async function reconstructStateToCommit(commitId: string): Promise<any> {
         if (!commit) throw new Error(`Commit history is broken. Could not find commit ${currentCommitId}`);
         commitPath.push(commit);
         if (commit.isSnapshot) break;
-        currentCommitId = commit.parent;
+        currentCommitId = commit.parents[0];
     }
 
     const baseCommit = commitPath.pop();
@@ -47,12 +47,13 @@ export async function reconstructStateToCommit(commitId: string): Promise<any> {
  */
 export const createCommit = async (
     message: string,
-    parentCommitId: string | null,
+    parentCommitIds: (string | null)[],
     branchId: string,
     newDocumentState: any,
     thumbnail: string
 ): Promise<Commit | null> => { // Note: It can now return null
     if (!message || message.trim() === "") throw new Error('Commit message cannot be empty.');
+    const parentCommitId = parentCommitIds[0]; // For delta calculation, we compare against the first parent.
 
     let payload: Uint8Array;
     let isSnapshot = false;
@@ -80,7 +81,7 @@ export const createCommit = async (
         message,
         author: 'user',
         timestamp: Date.now(),
-        parent: parentCommitId,
+        parents: parentCommitIds,
         isSnapshot,
         payload,
         thumbnail,
@@ -95,14 +96,51 @@ export const createCommit = async (
  * Retrieves the linear history for a given branch head.
  */
 export async function getHistoryForBranch(headCommitId: string | null): Promise<Commit[]> {
-    if (!headCommitId) return []; // Return empty array if branch has no commits
+    if (!headCommitId) return [];
     const history: Commit[] = [];
     let currentCommitId: string | null = headCommitId;
     while(currentCommitId) {
         const commit = await getCommit(currentCommitId);
         if (!commit) break;
         history.push(commit);
-        currentCommitId = commit.parent;
+
+        // --- THE FIX IS HERE ---
+        // Be robust: Check for the new 'parents' array first.
+        // If it doesn't exist, fall back to the old 'parent' property for backward compatibility.
+        if (commit.parents) {
+            currentCommitId = commit.parents[0];
+        } else {
+            // This handles old commit objects that might still be in the database.
+            currentCommitId = (commit as any).parent;
+        }
     }
     return history;
+}
+
+export async function findCommonAncestor(commitIdA: string, commitIdB: string): Promise<string | null> {
+    const pathA = new Set<string>();
+    let currentA: Commit | undefined = await getCommit(commitIdA);
+    while (currentA) {
+        pathA.add(currentA.id);
+        currentA = currentA.parents[0] ? await getCommit(currentA.parents[0]) : undefined;
+    }
+
+    let currentB: Commit | undefined = await getCommit(commitIdB);
+    while (currentB) {
+        if (pathA.has(currentB.id)) {
+            return currentB.id; // This is the first common ancestor found
+        }
+        currentB = currentB.parents[0] ? await getCommit(currentB.parents[0]) : undefined;
+    }
+
+    return null; // No common ancestor
+}
+
+export async function getAllCommits(): Promise<Commit[]> {
+    try {
+        return await db.commits.toArray();
+    } catch (e) {
+        console.error("Failed to get all commits", e);
+        return [];
+    }
 }

@@ -137,7 +137,7 @@ function start(): void {
                 
                 for (const item of items) {
                     if (count >= 5) break;
-                    if (item.type === "Ellipse" || item.type === "Rectangle" || item.type === "Text") {
+                         if (["Ellipse", "Rectangle", "Text", "StandaloneText"].includes(item.type)){
                         const fill = (item as any).fill;
                         let color = '#cccccc'; // Default grey
                         if (fill?.type === 'Color' && fill.color) {
@@ -163,7 +163,7 @@ function start(): void {
                 console.error("SVG Thumbnail generation failed:", error);
                 return "";
             }
-        }
+        },
     };
     runtime.exposeApi(sandboxApi);
 }

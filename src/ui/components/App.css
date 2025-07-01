@@ -35,8 +35,6 @@
     color: #888;
 }
 
-/* ... (keep existing styles) ... */
-
 .controls {
     display: flex;
     flex-wrap: wrap;
@@ -69,10 +67,16 @@
     border-radius: 4px;
 }
 
+
 .history-container {
     border-top: 1px solid #eee;
     margin-top: 10px;
     padding-top: 10px;
+    /* Add flex properties to make it fill remaining space */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0; /* Allows the container to shrink if needed */
 }
 
 .history-container h4 {
@@ -151,8 +155,8 @@
 /* Add these new styles to App.css */
 
 .history-list {
-    max-height: 250px; /* Or whatever height you prefer */
-    overflow-y: auto;
+    flex-grow: 1; /* Allows the list to take up the available space */
+    overflow-y: auto; /* Adds a scrollbar if the list is too long */
     border: 1px solid #eee;
     border-radius: 4px;
 }
@@ -162,7 +166,8 @@
     align-items: center;
     padding: 8px;
     border-bottom: 1px solid #eee;
-    gap: 10px;
+    gap: 8px;
+     animation: fadeIn 0.5s ease-out;
 }
 
 .commit-card:last-child {
@@ -177,22 +182,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevents the thumbnail from shrinking */
+}
+
+.commit-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 3px;
 }
 
 .commit-details {
-    flex-grow: 1;
-    overflow: hidden;
+    flex: 1 1 0; /* This shorthand tells the container to grow and shrink as needed */
+    min-width: 0; /* This is the magic bullet that allows text to truncate correctly */
 }
 
-.commit-message {
+/* .commit-message {
     font-weight: bold;
-    margin: 0;
     font-size: 14px;
+    margin: 0;
+    This set of rules will keep the message on one line and add '...' if it's too long
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+} */
+
+.commit-message {
+    font-weight: bold;
+    font-size: 14px;
+    margin: 0;
+    /* These properties allow the text to wrap */
+    white-space: normal;
+    word-break: break-word;
 }
 
 .commit-meta {
@@ -235,9 +256,141 @@
     text-overflow: ellipsis;
 }
 
-.commit-thumbnail img {
+/* Add this new style for the Diff Renderer */
+.diff-canvas {
+    position: relative;
     width: 100%;
-    height: 100%;
-    object-fit: contain; /* This makes sure the image scales nicely */
-    border-radius: 3px;  /* Optional: gives the thumbnail rounded corners */
+    height: 300px; /* Or adjust as needed */
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+/* Add these styles to App.css */
+
+.merge-panel {
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.merge-panel h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+}
+
+.branch-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mermaid-graph-container {
+    width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling for large graphs */
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.history-header h4 {
+    margin: 0;
+}
+
+.form-container, .branch-container, .merge-panel, .diff-panel {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.undo-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e0e0e0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+.undo-panel p {
+    margin: 0;
+    font-size: 12px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add these new styles to App.css */
+.onboarding-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.onboarding-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+}
+
+.onboarding-panel h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+}
+
+.onboarding-panel > p {
+    margin: 0 0 20px 0;
+    font-size: 12px;
+    color: #555;
+}
+
+.onboarding-steps {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
+}
+
+.onboarding-steps p {
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    font-size: 13px;
+}
+
+.onboarding-steps ol {
+    list-style-position: inside;
+    text-align: left;
+    padding: 0;
+    margin: 0 0 15px 0;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.onboarding-commit {
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
 }
